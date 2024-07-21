@@ -62,8 +62,6 @@ def main(stdscr):
     gpu_window.addstr(2, 2, " GPU |   BDF   | Root Port | Slot | PSB | Connector ")
     gpu_window.addstr(3, 2, "----------------------------------------------------")
     for i, gpu_info in enumerate(gpu_info_list):
-        # gpu_print = f"GPU {i}\t|\tBDF: {gpu_info[0]}\t|\tSlot: {gpu_info[1]}\t|\tRoot Port: {gpu_info[2]}\t|\tPSB {gpu_info[3]}"
-        # gpu_print = f"  {i}  | {gpu_info[0]} |  {gpu_info[2]}  |  {gpu_info[1]}  |  {gpu_info[3]}  | {gpu_info[4]}"
         gpu_print = f"{i:^5}|{gpu_info[0]:^9}|{gpu_info[2]:^11}|{gpu_info[1]:^6}|{gpu_info[3]:^5}| {gpu_info[4]}"
         gpu_window.addstr(i+4, 2, gpu_print.expandtabs(3))
     gpu_window.refresh()
@@ -174,13 +172,8 @@ def main(stdscr):
         input_window.clrtoeol()
         input_window.addstr(15, 0, "Running gpu_burn...")
         input_window.refresh()
-        # gpu_burn_process = multiprocessing.Process(target=gpu_burn_script.check_replay, args=(gpu_percent, gpu_run_time, 4, [], 10, output_window, height + 3, 55, output_window_height, output_window_width, pad_pos))
-        # gpu_burn_process.start()
-        # while gpu_burn_process.is_alive():
-
-        # gpu_burn_process.join()
         done = False
-        t = threading.Thread(target=animate, args=('g'))
+        t = threading.Thread(target=animate, args=('g',))
         t.start()
         pad_pos = gpu_burn_script.check_replay(gpu_percent, gpu_run_time, 4, [], 10, output_window, height + 3, 55, output_window_height, output_window_width, pad_pos)
         done = True
@@ -196,7 +189,7 @@ def main(stdscr):
         pad_pos = gpu_burn_script.output_print(output_window, height + 3, 55, output_window_height, output_window_width, pad_pos, "Running 629_diag...")
         input_window.refresh()
         done = False
-        t = threading.Thread(target=animate, args=('d'))
+        t = threading.Thread(target=animate, args=('d',))
         t.start()
         run_629_diag.main()
         pad_pos = gpu_burn_script.output_print(output_window, height + 3, 55, output_window_height, output_window_width, pad_pos, "629_Diag Finished Running")
@@ -207,7 +200,6 @@ def main(stdscr):
         time.sleep(1.5)
 
     if 's' in operations:
-        # Set error reporting to 0
         device_window_height = 15
         device_window = curses.newwin(device_window_height, 100, height + 7, 1)
         display_box(device_window, height + 7, 2, device_window_height, 60, "Device Control Status")
@@ -219,19 +211,14 @@ def main(stdscr):
         device_control.process_bdfs(bdfs)
 
         device_window.addstr(5, 2, "Error reporting set to 0.")
-        # device_window.refresh()
 
-        # Run the sbr functionality
         device_window.addstr(7, 2, "Running SBR tests...")
-        # device_window.refresh()
-
         sbr.run_test(device_window, user_password, inputnum_loops, kill, slotlist)
 
         device_window.addstr(9, 2, "SBR tests completed.")
         device_window.refresh()
         done = True
 
-        # Reset device control registers to original values
         device_window.addstr(8, 2, "Resetting device control registers...")
         device_window.refresh()
 
@@ -240,7 +227,6 @@ def main(stdscr):
         device_window.addstr(10, 2, "Device control registers reset to original values.")
         device_window.refresh()
 
-    # Display summary screen
     input_window.addstr(15, 0, "Generating Summary Window...")
     input_window.refresh()
     time.sleep(0.5)
@@ -264,7 +250,7 @@ def main(stdscr):
                 replays = int(lines[i+1].split(":")[-1].strip())
                 rollovers = int(lines[i+2].split(":")[-1].strip())
                 if replays > 0 or rollovers > 0:
-                    lines_to_summary.append(line + f"{replays} replays and {rollovers} rollovers")
+                    lines_to_summary.append(line + f"{replays} replays and {rollovers}")
         if len(lines_to_summary) == 0:
             summary_window.addstr(summary_line_pos, 0, "PASS: No Replays Detected")
             summary_line_pos += 1
