@@ -287,7 +287,7 @@ def main(stdscr):
         summary_line_pos += 1
 
         for slot, info in tested_bdf_info.items():
-            summary_window.addstr(summary_line_pos, 0, f"BDF: {slot}, Downstream BDF: {info['specific_bus_link']}")
+            summary_window.addstr(summary_line_pos, 0, f"Tested BDF: {slot}, Downstream BDF: {info['specific_bus_link']}")
             summary_line_pos += 1
             errors = info.get("errors", [])
             for error in errors:
