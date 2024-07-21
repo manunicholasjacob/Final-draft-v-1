@@ -5,7 +5,6 @@ from train_time import get_train_time  # Import the get_train_time function
 
 def read_header(bus):
     try:
-        #print(f"Reading header for bus: {bus}")
         bridge_control_output = subprocess.check_output(["setpci", "-s", bus, "0e.w"])
         return f" : {bridge_control_output.decode().strip()}"
     except subprocess.CalledProcessError:
@@ -13,7 +12,6 @@ def read_header(bus):
 
 def read_slot_capabilities(bus):
     try:
-        #print(f"Reading slot capabilities for bus: {bus}")
         slot_capabilities_output = subprocess.check_output(["setpci", "-s", bus, "CAP_EXP+0X14.l"])
         return slot_capabilities_output.decode().strip()
     except subprocess.CalledProcessError:
@@ -35,7 +33,6 @@ def hex_to_binary(hex_string):
 
 def read_secondary_bus_number(bus):
     try:
-        #print(f"Reading secondary bus number for bus: {bus}")
         secondary_bus_output = subprocess.check_output(["setpci", "-s", bus, "19.b"])
         return secondary_bus_output.decode().strip()
     except subprocess.CalledProcessError:
@@ -43,7 +40,6 @@ def read_secondary_bus_number(bus):
 
 def read_bridge_control(bus):
     try:
-        #print(f"Reading bridge control for bus: {bus}")
         bridge_control_output = subprocess.check_output(["setpci", "-s", bus, "3e.w"])
         return bridge_control_output.decode().strip()
     except subprocess.CalledProcessError:
@@ -51,7 +47,6 @@ def read_bridge_control(bus):
 
 def read_link_status(bus):
     try:
-        #print(f"Reading link status for bus: {bus}")
         link_status_output = subprocess.check_output(["setpci", "-s", bus, "CAP_EXP+0X12.w"])
         return link_status_output.decode().strip()
     except subprocess.CalledProcessError:
@@ -59,7 +54,6 @@ def read_link_status(bus):
 
 def read_link_capabilities17(bus):
     try:
-        #print(f"Reading link capabilities 17 for bus: {bus}")
         link_capabilities_output = subprocess.check_output(["setpci", "-s", bus, "CAP_EXP+0X0c.l"])
         return link_capabilities_output.decode().strip()
     except subprocess.CalledProcessError:
@@ -68,7 +62,6 @@ def read_link_capabilities17(bus):
 
 def read_link_capabilities18(bus):
     try:
-        #print(f"Reading link capabilities 18 for bus: {bus}")
         link_capabilities_output = subprocess.check_output(["setpci", "-s", bus, "CAP_EXP+0X0c.l"])
         return link_capabilities_output.decode().strip()
     except subprocess.CalledProcessError:
@@ -77,9 +70,7 @@ def read_link_capabilities18(bus):
 
 def set_bridge_control(bus, value, password):
     try:
-        #print(f"Setting bridge control for bus: {bus} to {value}")
         subprocess.run(["sudo", "-S", "setpci", "-s", bus, "3e.w=" + value], input=password.encode(), check=True)
-        #print(f"Set Bridge Control for {bus} to {value}")
     except subprocess.CalledProcessError:
         print(f"Error setting Bridge Control for {bus}.")
 
@@ -244,7 +235,6 @@ def run_test(stdscr, user_password, inputnum_loops, kill, slotlist):
                                 file.write(line + "\n")
                         stdscr.addstr(2, 0, "Link status does not match capabilities. Killing the program.")
                         stdscr.refresh()
-                        stdscr.getch()
                         return
 
     end_time = datetime.now()
@@ -257,9 +247,3 @@ def run_test(stdscr, user_password, inputnum_loops, kill, slotlist):
 
     stdscr.addstr(2, 0, "Test completed. Check the output.txt file for results.")
     stdscr.refresh()
-    stdscr.getch()  # Wait for a key press to keep the interface open
-
-# Example usage
-if __name__ == "__main__":
-    display_slot_numbers()
-    # Example: run_test(3, True, ['00:1f.0', '00:1c.0'])
