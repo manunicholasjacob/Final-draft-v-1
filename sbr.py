@@ -183,6 +183,8 @@ def run_test(stdscr, user_password, inputnum_loops, kill, slotlist):
     bridgecontrollist = []
     link_capabilities = {"upstream": [], "downstream": []}
 
+    tested_bdf_info = {}
+
     # Get maximum train time for selected slots
     max_train_time = 0
     for slot in slotlist:
@@ -214,22 +216,22 @@ def run_test(stdscr, user_password, inputnum_loops, kill, slotlist):
             if i % 2 == 0:
                 current_link_status_hex = read_link_status(specific_bus_link)
                 current_link_status = extract_link_status(current_link_status_hex)
-                if kill == "n":
-                    if current_link_status != link_capabilities["downstream"][indexlist.index(j)]:
-                        error_time = datetime.now()
-                        output_lines.append(f"Reset {i}")
-                        output_lines.append(f"Link status does not match capabilities for bus {specific_bus_link}")
-                        output_lines.append(f"Link Status: {current_link_status}")
-                        output_lines.append(f"Link Capabilities: {link_capabilities['downstream'][indexlist.index(j)]}")
-                        output_lines.append(f"Error Time: {error_time}")
-                elif kill == "y":
-                    if current_link_status != link_capabilities["downstream"][indexlist.index(j)]:
-                        error_time = datetime.now()
-                        output_lines.append(f"Reset {i}")
-                        output_lines.append(f"Link status does not match capabilities for bus {specific_bus_link}")
-                        output_lines.append(f"Link Status: {current_link_status}")
-                        output_lines.append(f"Link Capabilities: {link_capabilities['downstream'][indexlist.index(j)]}")
-                        output_lines.append(f"Error Time: {error_time}")
+                if current_link_status != link_capabilities["downstream"][indexlist.index(j)]:
+                    error_time = datetime.now()
+                    error_info = {
+                        "reset_count": i,
+                        "link_status": current_link_status,
+                        "link_capabilities": link_capabilities["downstream"][indexlist.index(j)],
+                        "error_time": error_time,
+                    }
+                    if slotnumbers[j] in tested_bdf_info:
+                        tested_bdf_info[slotnumbers[j]]["errors"].append(error_info)
+                    else:
+                        tested_bdf_info[slotnumbers[j]] = {
+                            "specific_bus_link": specific_bus_link,
+                            "errors": [error_info],
+                        }
+                    if kill == "y":
                         with open("output.txt", "w") as file:
                             for line in output_lines:
                                 file.write(line + "\n")
@@ -247,3 +249,5 @@ def run_test(stdscr, user_password, inputnum_loops, kill, slotlist):
 
     stdscr.addstr(2, 0, "Test completed. Check the output.txt file for results.")
     stdscr.refresh()
+
+    return tested_bdf_info
