@@ -213,7 +213,7 @@ def main(stdscr):
         device_window.addstr(5, 2, "Error reporting set to 0.")
 
         device_window.addstr(7, 2, "Running SBR tests...")
-        sbr.run_test(device_window, user_password, inputnum_loops, kill, slotlist)
+        tested_bdf_info = sbr.run_test(device_window, user_password, inputnum_loops, kill, slotlist)
 
         device_window.addstr(9, 2, "SBR tests completed.")
         device_window.refresh()
@@ -283,19 +283,28 @@ def main(stdscr):
         summary_window.refresh()
 
     if 's' in operations:
+        summary_window.addstr(summary_line_pos, 0, "SBR SUMMARY")
+        summary_line_pos += 1
+
+        for slot, info in tested_bdf_info.items():
+            summary_window.addstr(summary_line_pos, 0, f"BDF: {slot}, Downstream BDF: {info['specific_bus_link']}")
+            summary_line_pos += 1
+            errors = info.get("errors", [])
+            for error in errors:
+                summary_window.addstr(summary_line_pos, 0, f"Reset Count: {error['reset_count']}")
+                summary_window.addstr(summary_line_pos + 1, 0, f"Link Status: {error['link_status']}")
+                summary_window.addstr(summary_line_pos + 2, 0, f"Link Capabilities: {error['link_capabilities']}")
+                summary_window.addstr(summary_line_pos + 3, 0, f"Error Time: {error['error_time']}")
+                summary_line_pos += 4
+            summary_line_pos += 1
+
         try:
             with open("./output.txt", "r") as file:
                 lines = file.readlines()
 
             start_time = next(line for line in lines if line.startswith("Start Time:")).split(": ", 1)[1].strip()
             end_time = next(line for line in lines if line.startswith("End Time:")).split(": ", 1)[1].strip()
-            tested_bdfs = next(line for line in lines if line.startswith("Tested BDFs:")).split(": ", 1)[1].strip()
-            downstream_bdfs = next(line for line in lines if line.startswith("Downstream BDFs:")).split(": ", 1)[1].strip()
             slot_test_counts = next(line for line in lines if line.startswith("Slot Test Counts:")).split(": ", 1)[1].strip()
-            errors = [line for line in lines if "Error" in line]
-
-            summary_window.addstr(summary_line_pos, 0, "SBR SUMMARY")
-            summary_line_pos += 1
 
             def print_with_rollover(input, summary_line_pos):
                 print_width = summary_window_width - 4
@@ -307,18 +316,10 @@ def main(stdscr):
                 summary_line_pos += 1
                 return summary_line_pos
 
-            summary_line_pos = print_with_rollover(f"Tested BDFs:", summary_line_pos)
-            summary_line_pos = print_with_rollover(f"{tested_bdfs}", summary_line_pos)
-            summary_line_pos = print_with_rollover(f"Downstream BDFs:", summary_line_pos)
-            summary_line_pos = print_with_rollover(f"{downstream_bdfs}", summary_line_pos)
+            summary_line_pos = print_with_rollover(f"Start Time: {start_time}", summary_line_pos)
+            summary_line_pos = print_with_rollover(f"End Time: {end_time}", summary_line_pos)
             summary_line_pos = print_with_rollover(f"Slot Test Counts: {slot_test_counts}", summary_line_pos)
 
-            if errors:
-                summary_window.addstr(summary_line_pos, 0, f"Errors: {len(errors)}")
-                for i, error in enumerate(errors[:5], start=10):  # Display up to 5 errors
-                    summary_window.addstr(summary_line_pos + i, 2, error.strip())
-            else:
-                summary_window.addstr(summary_line_pos, 0, "No errors detected.")
         except Exception as e:
             summary_window.addstr(summary_line_pos, 0, f"Error reading summary: {str(e)}")
         summary_window.refresh()
