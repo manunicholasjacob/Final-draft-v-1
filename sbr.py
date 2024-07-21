@@ -237,7 +237,7 @@ def run_test(stdscr, user_password, inputnum_loops, kill, slotlist):
                                 file.write(line + "\n")
                         stdscr.addstr(2, 0, "Link status does not match capabilities. Killing the program.")
                         stdscr.refresh()
-                        return
+                        return tested_bdf_info
 
     end_time = datetime.now()
     output_lines.append(f"End Time: {end_time}")
